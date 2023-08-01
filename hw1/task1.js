@@ -125,12 +125,12 @@ function divide(item1, item2) {
             counter--
         }
         if (counter === 0) {
-            number = item1.slice(0, item2.length + 1)
+            number = item1.slice(0, length + 1)
             length = number.length
         } else {
             result += counter
             item1 = remainder + item1.slice(length)
-            number = item1.slice(0, item2.length + 1)
+            number = item1.slice(0, item2.length)
         }
     }
     return result
@@ -345,4 +345,12 @@ function replaceChar(string, char, index) {
     let result = divide(a, b)
     console.log(result)
     console.log(result === '5836436576879')
+}
+{
+    let a = '222'
+    let b = '2'
+
+    let result = divide(a, b)
+    console.log(result)
+    console.log(result === '111')
 }
