@@ -19,13 +19,13 @@ function plus(item1, item2) {
     }
     if (item1.length > 0) {
         if (adding > 0) {
-            return item1.slice(0, -1) + (parseDigit(result.at(0)) + parseDigit(item1.at(-1))) + result.slice(1)
+            return plus(item1, result.at(0)) + result.slice(1)
         }
         return item1 + result
     }
     if (item2.length > 0) {
         if (adding > 0) {
-            return item2.slice(0, -1) + (parseDigit(result.at(0)) + parseDigit(item2.at(-1))) + result.slice(1)
+            return plus(item2, result.at(0)) + result.slice(1)
         }
         return item2 + result
     }
@@ -35,12 +35,19 @@ function plus(item1, item2) {
 function minus(item1, item2) {
     let result = ''
     while (item1.length > 0 && item2.length > 0) {
+        if (item1.length < item2.length) {
+            return '-1'
+        }
         let sum = parseDigit(item1.at(-1)) - parseDigit(item2.at(-1))
         let additionalIndex = 1
         while (sum < 0) {
+            if (item1.length <= additionalIndex) {
+                return '-1'
+            }
             sum += Math.pow(10, additionalIndex) * parseDigit(item1.at(-additionalIndex - 1))
             additionalIndex++
         }
+        item1 = replaceChar(item1, Math.floor(sum / Math.pow(10, additionalIndex - 1)), item1.length - additionalIndex)
         while (sum > 9) {
             item1 = replaceChar(item1, Math.floor(sum / Math.pow(10, additionalIndex - 1)), item1.length - additionalIndex)
             sum %= Math.pow(10, additionalIndex - 1)
@@ -55,6 +62,9 @@ function minus(item1, item2) {
     }
     while (result.at(0) === '0') {
         result = result.slice(1)
+    }
+    if (result.length === 0) {
+        return '0'
     }
     return result
 }
@@ -92,6 +102,36 @@ function multiply(item1, item2) {
         counter++
         item1 = item1copy
         item2 = item2.slice(0, -1)
+    }
+    return result
+}
+
+function divide(item1, item2) {
+    let result = ''
+    let number = item1.slice(0, item2.length)
+    let length = number.length
+    while (item1.length > 0) {
+        let remainder = number
+        let counter = 0
+        while (number !== '0' && number !== '-1') {
+            remainder = number
+            number = minus(number, item2)
+            if (number === '0') {
+                remainder = ''
+            }
+            counter++
+        }
+        if (number !== '0') {
+            counter--
+        }
+        if (counter === 0) {
+            number = item1.slice(0, item2.length + 1)
+            length = number.length
+        } else {
+            result += counter
+            item1 = remainder + item1.slice(length)
+            number = item1.slice(0, item2.length + 1)
+        }
     }
     return result
 }
@@ -262,4 +302,47 @@ function replaceChar(string, char, index) {
     let result = multiply(a, b)
     console.log(result)
     console.log(result === '1528118543109066089630314')
+}
+
+//DIVIDE TESTS
+
+{
+    let a = '465'
+    let b = '15'
+
+    let result = divide(a, b)
+    console.log(result)
+    console.log(result === '31')
+}
+{
+    let a = '273'
+    let b = '3'
+
+    let result = divide(a, b)
+    console.log(result)
+    console.log(result === '91')
+}
+{
+    let a = '21750'
+    let b = '58'
+
+    let result = divide(a, b)
+    console.log(result)
+    console.log(result === '375')
+}
+{
+    let a = '1161364'
+    let b = '199'
+
+    let result = divide(a, b)
+    console.log(result)
+    console.log(result === '5836')
+}
+{
+    let a = '1163325678986796404228728'
+    let b = '199321223432'
+
+    let result = divide(a, b)
+    console.log(result)
+    console.log(result === '5836436576879')
 }
