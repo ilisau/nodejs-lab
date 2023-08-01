@@ -11,17 +11,23 @@ function plus(item1, item2) {
             adding = 0
         }
         result = sum + result
-        item1 = item1.slice(0, - 1)
-        item2 = item2.slice(0, - 1)
-    }
-    if (item1.length > 0) {
-        result = item1 + result
-    }
-    if (item2.length > 0) {
-        result = item2 + result
+        item1 = item1.slice(0, -1)
+        item2 = item2.slice(0, -1)
     }
     if (adding > 0) {
         result = adding + result
+    }
+    if (item1.length > 0) {
+        if (adding > 0) {
+            return item1.slice(0, -1) + (parseDigit(result.at(0)) + parseDigit(item1.at(-1))) + result.slice(1)
+        }
+        return item1 + result
+    }
+    if (item2.length > 0) {
+        if (adding > 0) {
+            return item2.slice(0, -1) + (parseDigit(result.at(0)) + parseDigit(item2.at(-1))) + result.slice(1)
+        }
+        return item2 + result
     }
     return result
 }
@@ -49,6 +55,43 @@ function minus(item1, item2) {
     }
     while (result.at(0) === '0') {
         result = result.slice(1)
+    }
+    return result
+}
+
+function multiply(item1, item2) {
+    let result = ''
+    let adding = 0
+    if (item2.length > item1.length) {
+        [item1, item2] = [item2, item1]
+    }
+    let item1copy = item1
+    let counter = 0
+    while (item2.length > 0) {
+        let innerResult = ''
+        while (item1.length > 0) {
+            let sum = parseDigit(item1.at(-1)) * parseDigit(item2.at(-1))
+            sum += adding
+            if (sum > 9) {
+                adding = Math.floor(sum / 10)
+                sum %= 10
+            } else {
+                adding = 0
+            }
+            innerResult = sum + innerResult
+            item1 = item1.slice(0, -1)
+        }
+        if (adding > 0) {
+            innerResult = adding + innerResult
+            adding = 0
+        }
+        for (let i = 0; i < counter; i++) {
+            innerResult += '0'
+        }
+        result = plus(result, innerResult)
+        counter++
+        item1 = item1copy
+        item2 = item2.slice(0, -1)
     }
     return result
 }
@@ -176,4 +219,47 @@ function replaceChar(string, char, index) {
     let result = minus(a, b)
     console.log(result)
     console.log(result === '8886221120200989407669558293334')
+}
+
+//MULTIPLY TESTS
+
+{
+    let a = '123'
+    let b = '3'
+
+    let result = multiply(a, b)
+    console.log(result)
+    console.log(result === '369')
+}
+{
+    let a = '379'
+    let b = '36'
+
+    let result = multiply(a, b)
+    console.log(result)
+    console.log(result === '13644')
+}
+{
+    let a = '12349'
+    let b = '1239573'
+
+    let result = multiply(a, b)
+    console.log(result)
+    console.log(result === '15307486977')
+}
+{
+    let a = '582323597123061230479'
+    let b = '26346871432914932579833'
+
+    let result = multiply(a, b)
+    console.log(result)
+    console.log(result === '15342404945753846152707367724308574880330007')
+}
+{
+    let a = '58'
+    let b = '26346871432914932579833'
+
+    let result = multiply(a, b)
+    console.log(result)
+    console.log(result === '1528118543109066089630314')
 }
