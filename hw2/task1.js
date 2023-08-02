@@ -6,6 +6,9 @@ function addValues(item1, item2) {
     if (item1 instanceof Array && item2 instanceof Array) {
         return item1.concat(item2)
     }
+    if (typeof item1 === "undefined" || typeof item2 === "undefined") {
+        throw new Error("You can not add undefined values")
+    }
     switch (typeof item1) {
         case "boolean": {
             return !(item1 === false || item2 === false)
