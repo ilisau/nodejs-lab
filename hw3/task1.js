@@ -21,12 +21,12 @@ function calculateTotalPrice(products) {
         throw new Error("You need to pass array of products as first argument")
     }
     return products.reduce(
-        (a, b) => {
-            if (a.price === undefined) {
+        (sum, product) => {
+            if (product.price === undefined) {
                 throw new Error("Product must have price before being discounted")
             }
             return ({
-                price: a.price + b.price
+                price: sum.price + product.price
             })
         }, {price: 0}).price
 }
