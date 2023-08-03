@@ -1,16 +1,13 @@
 function createCounter() {
     let count = 0
-
-    function counter() {
+    return function counter() {
         count++
         return count
     }
-
-    return counter
 }
 
 function repeatFunction(func, repeat) {
-    function repeatable() {
+    return function repeatable() {
         if (repeat >= 0) {
             for (let i = 0; i < repeat; i++) {
                 func()
@@ -21,8 +18,6 @@ function repeatFunction(func, repeat) {
             }
         }
     }
-
-    return repeatable
 }
 
 // CREATE COUNTER TESTS
@@ -39,18 +34,14 @@ function repeatFunction(func, repeat) {
 
 {
     let repeat = 5
-    let func = function test() {
-        console.log("Test function")
-    }
+    let func = () => console.log("Test function")
     let counter = repeatFunction(func, repeat)
 
     counter()
 }
 {
     let repeat = -5
-    let func = function test() {
-        console.log("Test function")
-    }
+    let func = () => console.log("Test function")
     let counter = repeatFunction(func, repeat)
 
     counter()
