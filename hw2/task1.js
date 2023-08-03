@@ -10,13 +10,13 @@ function addValues(item1, item2) {
         throw new Error("You can not add undefined values")
     }
     switch (typeof item1) {
-        case "boolean": {
-            return !(item1 === false || item2 === false)
-
-        }
-        default: {
+        case "boolean":
+            return item1 + item2 === 1
+        case "number":
+        case "string":
             return item1 + item2
-        }
+        default:
+            throw new Error("Unsupported types")
     }
 }
 
@@ -59,27 +59,30 @@ function coerceToType(value, type) {
     let valueType = typeof value
     switch (type) {
         case "string": {
-            if (valueType === "object") {
-                return JSON.stringify(value)
+            switch (valueType) {
+                case "object":
+                    return JSON.stringify(value)
+                default:
+                    return value.toString()
             }
-            return value.toString()
         }
         case "number": {
-            if (valueType === "boolean") {
-                return value ? 1 : 0
-            } else if (valueType === "string") {
-                return convertToNumber(value)
-            } else {
-                throw new Error("Inappropriate coercing type")
+            switch (valueType) {
+                case "string":
+                case "boolean":
+                    return convertToNumber(value)
+                default:
+                    throw new Error("Inappropriate coercing type")
             }
         }
         case "boolean": {
-            if (valueType === "string") {
-                return value === "true" || value === "1"
-            } else if (valueType === "number") {
-                return value === 1
-            } else {
-                throw new Error("Inappropriate coercing type")
+            switch (valueType) {
+                case "string":
+                    return value === "true" || value === "1"
+                case "number":
+                    return value === 1
+                default:
+                    throw new Error("Inappropriate coercing type")
             }
         }
         default:
@@ -95,7 +98,7 @@ function coerceToType(value, type) {
     let result = addValues(a, b)
 
     console.log(result)
-    console.log(result === false)
+    console.log(result === true)
 }
 {
     let a = "firstString"
