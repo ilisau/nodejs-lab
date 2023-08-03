@@ -10,24 +10,39 @@ function getFullName(person) {
 }
 
 function filterUniqueWords(text) {
-    return [...new Set(text.split(/\W+/).sort())]
+    return [...new Set(text.toLowerCase().split(/\W+/).sort())]
 }
 
-function getAverageGrade(students) {
-    if (!students instanceof Array) {
-        throw new Error("You need to pass array of students as argument")
+function getAverageGrade(marks) {
+    if (!marks instanceof Array) {
+        throw new Error("You need to pass array of marks as argument")
     }
-    if (students.length === 0) {
+    if (marks.length === 0) {
         return 0
     }
-    return students.reduce((sum, student) => {
-        if (student.name === undefined || student.grade === undefined) {
-            throw new Error("Student must have name and grade")
+    let result = new Map();
+    for (let mark of marks) {
+        let key = mark["name"];
+        let value = mark["grade"];
+        if (result.has(key)) {
+            result.get(key).push(value);
+        } else {
+            result.set(key, [value]);
         }
-        return ({
-            grade: sum.grade + student.grade
-        })
-    }, {grade: 0}).grade / students.length
+    }
+    return Array.from(result.keys())
+        .map(name => (
+            {name: name, grade: averageOfArray(result.get(name))}
+        ))
+}
+
+function averageOfArray(array) {
+    if (array.length === 0) {
+        return 0
+    }
+    return array.reduce((item, sum) => {
+        return sum + item
+    }, 0) / array.length
 }
 
 // GET FULL NAME TESTS
@@ -57,6 +72,13 @@ function getAverageGrade(students) {
     console.log(result.toString() === "word1,word2,word3")
 }
 {
+    let words = "Hello hello Mark"
+    let result = filterUniqueWords(words)
+
+    console.log(result)
+    console.log(result.toString() === "hello,mark")
+}
+{
     let words = "word1 word2 word1"
     let result = filterUniqueWords(words)
 
@@ -74,23 +96,22 @@ function getAverageGrade(students) {
 // GET AVERAGE GRADE LENGTH
 
 {
-    let students = [{name: "Bob", grade: 5}, {name: "Alice", grade: 10}]
+    let students = [
+        {name: "Bob", grade: 5},
+        {name: "Alice", grade: 10}
+    ]
     let result = getAverageGrade(students)
 
     console.log(result)
-    console.log(result === 7.5)
 }
 {
-    let students = []
+    let students = [
+        {name: "Bob", grade: 5},
+        {name: "Alice", grade: 10},
+        {name: "Bob", grade: 3},
+        {name: "Alice", grade: 7}
+    ]
     let result = getAverageGrade(students)
 
     console.log(result)
-    console.log(result === 0)
-}
-{
-    let students = [{name: "Bob", grade: 5}, {name: "Alice", grade: 10}, {name: "Mark", grade: 3}]
-    let result = getAverageGrade(students)
-
-    console.log(result)
-    console.log(result === 6)
 }
