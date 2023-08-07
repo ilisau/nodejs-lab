@@ -5,7 +5,7 @@ function createImmutableObject(object) {
                 if (innerObject[property] instanceof Object) {
                     handleInnerObject(innerObject[property])
                 }
-                Object.defineProperty(innerObject, property, {writable: false})
+                Object.defineProperty(innerObject, property, {writable: false, configurable: false})
             }
         }
     }

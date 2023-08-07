@@ -7,7 +7,7 @@ let person = {
     updateInfo(info) {
         Object.getOwnPropertyNames(info)
             .forEach(property => {
-                if (Object.hasOwn(this, property)) {
+                if (Object.hasOwn(this, property) && Object.getOwnPropertyDescriptor(this, property).writable) {
                     Object.defineProperty(this, property, {value: info[property]})
                 }
             })
@@ -18,19 +18,13 @@ Object.getOwnPropertyNames(person)
     .forEach(property =>
         Object.defineProperty(person, property, {writable: false}))
 
-Object.defineProperty(person, "address", {value: {}, enumerable: false, configurable: false})
+Object.defineProperty(person, "address", {value: {}, writable: true, enumerable: false, configurable: false})
 
 // TESTS
 
 {
-    person.updateInfo({age: 35})
+    person.updateInfo({address: {city: "Minsk"}})
 
     console.log(person)
-    console.log(person.age === 35)
-}
-{
-    person.age = 40
-
-    console.log(person)
-    console.log(person.age === 35)
+    console.log(person.address.city === "Minsk")
 }
