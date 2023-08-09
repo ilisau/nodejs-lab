@@ -1,20 +1,12 @@
 function getArrayIntersection(array1, array2) {
-    let result = []
-    let array1sorted = array1.sort()
-    let array2sorted = array2.sort()
-    let pos = -1
-    for (let i = 0; i < array1sorted.length; i++) {
-        for (let j = pos + 1; j < array2sorted.length; j++) {
-            if (array1sorted[i] === array2sorted[j]) {
-                pos = j
-                result.push(array1sorted[i])
-                break
-            } else if (array1sorted[i] < array2sorted[j]) {
-                break
-            }
+    const intersection = [];
+    let [longerArray, shorterArray] = array1.length > array2.length ? [array1, array2] : [array2, array1]
+    for (const element of shorterArray) {
+        if (longerArray.includes(element)) {
+            intersection.push(element)
         }
     }
-    return result
+    return intersection
 }
 
 function getArrayUnion(array1, array2) {
