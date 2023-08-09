@@ -2,9 +2,9 @@ function getArrayIntersection(array1, array2) {
     let result = []
     let array1sorted = array1.sort()
     let array2sorted = array2.sort()
-    let pos = 0
+    let pos = -1
     for (let i = 0; i < array1sorted.length; i++) {
-        for (let j = pos; j < array2sorted.length; j++) {
+        for (let j = pos + 1; j < array2sorted.length; j++) {
             if (array1sorted[i] === array2sorted[j]) {
                 pos = j
                 result.push(array1sorted[i])
@@ -47,6 +47,13 @@ function getArrayUnion(array1, array2) {
 {
     let array1 = [5]
     let array2 = [2, 3, 4, 5]
+    let result = getArrayIntersection(array2, array1)
+
+    console.log(result)
+}
+{
+    let array1 = [6]
+    let array2 = [6, 6, 6]
     let result = getArrayIntersection(array2, array1)
 
     console.log(result)
