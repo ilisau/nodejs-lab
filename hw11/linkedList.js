@@ -1,12 +1,12 @@
 class LinkedList {
-	#head;
+	#start;
 	#size;
 
 	/**
 	 * Creates object and initialize head node and size.
 	 */
 	constructor() {
-		this.#head = null;
+		this.#start = null;
 		this.#size = 0;
 	}
 
@@ -15,11 +15,16 @@ class LinkedList {
 	 * @param item
 	 */
 	push(item) {
-		let node = new Node(item, null, this.#head);
-		if (this.#head !== null) {
-			this.#head.next = node;
+		let node = new Node(item);
+		if (this.#start !== null) {
+			let end = this.#start;
+			while (end.next) {
+				end = end.next;
+			}
+			end.next = node;
+		} else {
+			this.#start = node;
 		}
-		this.#head = node;
 		this.#size++;
 	}
 
@@ -27,8 +32,12 @@ class LinkedList {
 	 * Removes item from the end of list.
 	 */
 	pop() {
-		if (this.#head !== null) {
-			this.#head = this.#head.previous;
+		if (this.#start !== null) {
+			let end = this.#start;
+			while (end.next) {
+				end = end.next;
+			}
+			end = null;
 			this.#size--;
 		}
 	}
@@ -42,10 +51,9 @@ class LinkedList {
 		if (index < 0 || index > this.#size - 1) {
 			throw new Error(`Index is out of bounds [0, ${this.#size - 1}]`);
 		}
-		let node = this.#head;
-		while (index < this.#size - 1) {
-			node = node.previous;
-			index++;
+		let node = this.#start;
+		for (let i = 0; i < index; i++) {
+			node = node.next;
 		}
 		return node.value;
 	}
@@ -59,10 +67,9 @@ class LinkedList {
 		if (index < 0 || index > this.#size - 1) {
 			throw new Error(`Index is out of bounds [0, ${this.#size - 1}]`);
 		}
-		let node = this.#head;
-		while (index < this.#size - 1) {
-			node = node.previous;
-			index++;
+		let node = this.#start;
+		for (let i = 0; i < index; i++) {
+			node = node.next;
 		}
 		node.value = item;
 	}
@@ -73,14 +80,14 @@ class LinkedList {
 	 * @returns {number}
 	 */
 	indexOf(item) {
-		let node = this.#head;
-		let pos = this.#size - 1;
+		let node = this.#start;
+		let pos = 0;
 		while (node !== null) {
 			if (node.value === item) {
 				return pos;
 			}
-			node = node.previous;
-			pos--;
+			node = node.next;
+			pos++;
 		}
 		return -1;
 	}
@@ -97,12 +104,10 @@ class LinkedList {
 class Node {
 	#value;
 	#next;
-	#previous;
 
-	constructor(value, next, previous) {
+	constructor(value, next = null) {
 		this.#value = value;
 		this.#next = next;
-		this.#previous = previous;
 	}
 
 	get value() {
@@ -119,14 +124,6 @@ class Node {
 
 	set next(node) {
 		this.#next = node;
-	}
-
-	get previous() {
-		return this.#previous;
-	}
-
-	set previous(node) {
-		this.#previous = node;
 	}
 }
 
