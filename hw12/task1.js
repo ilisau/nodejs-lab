@@ -23,7 +23,7 @@ class CustomHashTable {
 			const char = key.toString().charCodeAt(i);
 			hash = (hash << 5) - hash + char;
 		}
-		return hash.toString();
+		return hash;
 	}
 
 	/**
@@ -51,7 +51,7 @@ class CustomHashTable {
 		let index = this.hash(key) % this.#bucketsAmount;
 		let list = this.#values[index];
 		for (let i = 0; i < list.size; i++) {
-			if (this.hash(list.get(i).key === this.hash(key))) {
+			if (this.hash(list.get(i).key) === this.hash(key)) {
 				return list.get(i).value;
 			}
 		}
@@ -67,7 +67,7 @@ class CustomHashTable {
 		let index = this.hash(key) % this.#bucketsAmount;
 		let list = this.#values[index];
 		for (let i = 0; i < list.size; i++) {
-			if (this.hash(list.get(i).key === this.hash(key))) {
+			if (this.hash(list.get(i).key) === this.hash(key)) {
 				list.remove(i);
 				return;
 			}
@@ -76,7 +76,7 @@ class CustomHashTable {
 
 	#replaceOrInsert(list, value, key) {
 		for (let i = 0; i < list.size; i++) {
-			if (this.hash(list.get(i).key === this.hash(key))) {
+			if (this.hash(list.get(i).key) === this.hash(key)) {
 				list.set(i, {key: key, value: value});
 				return;
 			}
@@ -118,4 +118,14 @@ class CustomHashTable {
 	hasher.delete('key');
 	hasher.insert('key', 'second value');
 	console.log(hasher.get('key'));
+}
+{
+	const hasher = new CustomHashTable();
+
+	hasher.insert('key1', 'value1');
+	hasher.insert('key2', 'value2');
+	hasher.insert('key3', 'value3');
+
+	const retrievedValue = hasher.get('key1');
+	console.log(retrievedValue);
 }
