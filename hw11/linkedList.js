@@ -1,9 +1,9 @@
-class LinkedList {
+export class LinkedList {
 	#start;
 	#size;
 
 	/**
-	 * Creates object and initialize head node and size.
+	 * Creates object and initializes head node and size.
 	 */
 	constructor() {
 		this.#start = null;
@@ -43,7 +43,7 @@ class LinkedList {
 	}
 
 	/**
-	 * Returns item by index or throw an exception if index is out of bounds.
+	 * Returns item by index or throws an exception if index is out of bounds.
 	 * @param index
 	 * @returns {*}
 	 */
@@ -59,7 +59,7 @@ class LinkedList {
 	}
 
 	/**
-	 * Set item by index or throw an exception if index is out of bounds.
+	 * Set item by index or throws an exception if index is out of bounds.
 	 * @param index
 	 * @param item
 	 */
@@ -72,6 +72,32 @@ class LinkedList {
 			node = node.next;
 		}
 		node.value = item;
+	}
+
+	/**
+	 * Removes item by index or throws an exception if index is out of bounds.
+	 * @param index
+	 */
+	remove(index) {
+		if (index < 0 || index > this.#size - 1) {
+			throw new Error(`Index is out of bounds [0, ${this.#size - 1}]`);
+		}
+		this.#size--;
+		if (index === 0) {
+			this.#start = this.#start.next;
+			return;
+		}
+		let node = this.#start;
+		let previous = null;
+		for (let i = 0; i < index; i++) {
+			previous = node;
+			node = node.next;
+		}
+		if (node.next) {
+			previous.next = node.next;
+		} else {
+			previous.next = null;
+		}
 	}
 
 	/**
@@ -181,4 +207,16 @@ class Node {
 	console.log(list.indexOf(0) === -1);
 	console.log(list.indexOf(10) === 0);
 	console.log(list.indexOf(5) === 3);
+}
+{
+	let list = new LinkedList();
+	list.push(1);
+	list.push(2);
+	list.push(3);
+	list.push(4);
+	list.remove(1)
+	list.remove(1);
+
+	console.log(list.get(0) === 1);
+	console.log(list.get(1) === 4);
 }
