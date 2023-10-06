@@ -8,15 +8,16 @@ function myJSONParse(jsonString) {
 	while ((match = regex.exec(jsonString)) !== null) {
 		matches.push(match[0]);
 	}
-	matches = validateJson(matches);
+	matches = validateJsonObject(matches);
 	return handleNestedObject(matches)[0];
 }
 
-function validateJson(matches) {
-	if (matches.at(0) !== '{' || matches.at(-1) !== '}') {
+function validateJsonObject(matches) {
+	let index = matches.indexOf('}');
+	if (matches.at(0) !== '{' || index === -1) {
 		throw new Error("Invalid JSON structure, expected {...}");
 	}
-	return matches.slice(1, -1);
+	return matches.slice(1);
 }
 
 function castedValue(value) {
@@ -34,19 +35,49 @@ function handleNestedObject(matches) {
 	while (matches.length !== 0) {
 		let key = matches[0].replaceAll('"', '');
 		let value = matches[2];
-		if (value !== '{' && value !== '[') {
+		if (key === ']') {
+			break;
+		}
+		if (key === '}') {
+			matches = matches.slice(1);
+			break;
+		}
+		if (key === ',') {
+			matches = matches.slice(1);
+			if (matches.at(0) === '{') {
+				break;
+			}
+		} else if (value !== '{' && value !== '[') {
 			object[key] = castedValue(value);
-			matches = matches.slice(4);
+			if (matches.at(3) === ',') {
+				matches = matches.slice(4);
+			} else {
+				matches = matches.slice(3);
+			}
 		} else if (value === '{') {
 			let newValue;
 			let newMatches;
-			[newValue, newMatches] = handleNestedObject(validateJson(matches.slice(2)))
+			[newValue, newMatches] = handleNestedObject(validateJsonObject(matches.slice(2)))
 			object[key] = newValue;
 			matches = newMatches;
-		} else if (value === '}') {
+		} else if (value === '}' || value === ']') {
 			break;
 		} else if (value === '[') {
 			object[key] = [];
+			if(matches.at(0) !== ']') {
+				matches = matches.slice(3);
+			}
+			while (matches.at(0) !== ']') {
+				let newValue;
+				let newMatches;
+				[newValue, newMatches] = handleNestedObject(validateJsonObject(matches))
+				object[key].push(newValue);
+				matches = newMatches;
+				if (matches.at(0) === ',') {
+					matches = matches.slice(1);
+				}
+			}
+			matches = matches.slice(1);
 		}
 	}
 	return [object, matches];
@@ -73,20 +104,53 @@ function handleNestedObject(matches) {
 	console.assert(_.isEqual({name: 'John', age: 30, city: {name: "New York", country: "USA"}}, jsonObject));
 }
 {
-	const jsonString = '{"name": "John", "age": 30, "cities": [{"name": "New York", "country": "USA"}, {"name": "Mexico City", "country": "Mexico"]}';
+	const jsonString = '{"name": "John", "age": 30, "city": {"name": "New York", "country": "USA"}, "parent": {"name": "Mom"}}';
 	const jsonObject = myJSONParse(jsonString);
 	console.log(jsonObject);
 	console.assert(_.isEqual({
 		name: 'John',
 		age: 30,
-		cities: [{name: "New York", country: "USA"}, {name: "Mexico City", country: "Mexico"}]
+		city: {name: "New York", country: "USA"},
+		parent: {name: "Mom"}
 	}, jsonObject));
 }
-// {
-// 	try {
-// 		const jsonString = '"name": "John", "age": 30, "cities": ["name": "Minsk", "country": "Belarus"]}';
-// 		const jsonObject = myJSONParse(jsonString);
-// 	} catch (e) {
-// 		console.log(e.message)
-// 	}
-// }
+{
+	const jsonString = '{"name": "John", "age": 30, "city": {"name": "New York", "country": "USA"}, "gender": "male"}';
+	const jsonObject = myJSONParse(jsonString);
+	console.log(jsonObject);
+	console.assert(_.isEqual({
+		name: 'John',
+		age: 30,
+		city: {name: "New York", country: "USA"},
+		gender: "male"
+	}, jsonObject));
+}
+{
+	const jsonString = '{"name": "John", "age": 30, "cities": [{"name": "New York", "country": "USA"}, {"name": "Mexico City", "country": "Mexico"}], "gender": "male"}';
+	const jsonObject = myJSONParse(jsonString);
+	console.log(jsonObject);
+	console.assert(_.isEqual({
+		name: 'John',
+		age: 30,
+		cities: [{name: "New York", country: "USA"}, {name: "Mexico City", country: "Mexico"}],
+		gender: "male"
+	}, jsonObject));
+}
+{
+	const jsonString = '{"name": "John", "cities": [{"names": [{"name": "New York", "country": "USA"}]}], "gender": "male"}';
+	const jsonObject = myJSONParse(jsonString);
+	console.log(jsonObject);
+	console.assert(_.isEqual({
+		name: 'John',
+		cities: [{names: [{name: "New York", country: "USA"}]}],
+		gender: "male"
+	}, jsonObject));
+}
+{
+	try {
+		const jsonString = '"name": "John", "age": 30, "cities": ["name": "Minsk", "country": "Belarus"]}';
+		const jsonObject = myJSONParse(jsonString);
+	} catch (e) {
+		console.log(e.message)
+	}
+}
