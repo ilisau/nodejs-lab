@@ -1,4 +1,4 @@
-class Stack {
+export default class Stack {
 	#items;
 	#index;
 
@@ -37,7 +37,7 @@ class Stack {
 	 * @returns {*|null}
 	 */
 	peek() {
-		if (this.#index <= 0) {
+		if (this.#index < 0) {
 			return null;
 		}
 		return this.#items[this.#index - 1];

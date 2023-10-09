@@ -1,86 +1,106 @@
-import _ from 'lodash';
+import Stack from "../hw11/stack.js";
+import _ from "lodash";
 
-function myJSONParse(jsonString) {
-	const regex = /[:,\{\}\[\]]|(\".*?\")|('.*?')|[-\w.]+/g;
-	let match;
-	let matches = [];
+const regex = /(\[)|(\])|(\{)|(\})|(\:)|(,)|(null)\b|(true)\b|(false)\b|(-?\d+(?:\.\d+)?)|(\"(?:\\\"|[^\"])*\")|([^\[\]{}:,\"\s]+)/g;
 
-	while ((match = regex.exec(jsonString)) !== null) {
-		matches.push(match[0]);
-	}
-	matches = validateJsonObject(matches);
-	return handleNestedObject(matches)[0];
-}
-
-function validateJsonObject(matches) {
-	let index = matches.indexOf('}');
-	if (matches.at(0) !== '{' || index === -1) {
-		throw new Error("Invalid JSON structure, expected {...}");
-	}
-	return matches.slice(1);
-}
-
-function castedValue(value) {
-	if (!isNaN(value) && !isNaN(parseFloat(value))) {
-		return parseFloat(value);
-	}
-	if (value === 'null') {
-		return null;
-	}
-	return value.replaceAll('"', '');
-}
-
-function handleNestedObject(matches) {
-	let object = {};
-	while (matches.length !== 0) {
-		let key = matches[0].replaceAll('"', '');
-		let value = matches[2];
-		if (key === ']') {
-			break;
-		}
-		if (key === '}') {
-			matches = matches.slice(1);
-			break;
-		}
-		if (key === ',') {
-			matches = matches.slice(1);
-			if (matches.at(0) === '{') {
-				break;
-			}
-		} else if (value !== '{' && value !== '[') {
-			object[key] = castedValue(value);
-			if (matches.at(3) === ',') {
-				matches = matches.slice(4);
-			} else {
-				matches = matches.slice(3);
-			}
-		} else if (value === '{') {
-			let newValue;
-			let newMatches;
-			[newValue, newMatches] = handleNestedObject(validateJsonObject(matches.slice(2)))
-			object[key] = newValue;
-			matches = newMatches;
-		} else if (value === '}' || value === ']') {
-			break;
-		} else if (value === '[') {
-			object[key] = [];
-			if(matches.at(0) !== ']') {
-				matches = matches.slice(3);
-			}
-			while (matches.at(0) !== ']') {
-				let newValue;
-				let newMatches;
-				[newValue, newMatches] = handleNestedObject(validateJsonObject(matches))
-				object[key].push(newValue);
-				matches = newMatches;
-				if (matches.at(0) === ',') {
-					matches = matches.slice(1);
+/**
+ * Parse input string into object.
+ * @param json json string
+ * @returns {object} parsed object
+ */
+function myJSONParse(json) {
+	let stack = new Stack();
+	let elements = [];
+	let currentObject = null;
+	let key = null;
+	let object = null;
+	Array.from(json.matchAll(regex)).forEach(match => {
+		let lastElement = elements[elements.length - 1];
+		let isBracketsOpen;
+		switch (match[0]) {
+			case '{':
+				if (lastElement !== undefined && lastElement[0] !== '[') {
+					elements.pop();
 				}
-			}
-			matches = matches.slice(1);
+				if (currentObject === null) {
+					currentObject = {};
+					break;
+				}
+				const newObj = {};
+				addField(currentObject, key, newObj);
+				key = null;
+				stack.push(currentObject);
+				currentObject = newObj;
+				break;
+			case '}':
+				isBracketsOpen = lastElement[0] === '{' || (elements.length !== 0 && elements.pop()[0] === '{');
+				currentObject = stack.peek() !== undefined ? stack.pop() : currentObject;
+				object = currentObject;
+				break;
+			case ':':
+				break;
+			case ',':
+				lastElement = elements.pop();
+				break;
+			case '[':
+				if (lastElement[0] !== '[') {
+					elements.pop();
+				}
+				const newArray = [];
+				addField(currentObject, key, newArray);
+				key = null;
+				stack.push(currentObject);
+				currentObject = newArray;
+				break;
+			case ']':
+				isBracketsOpen = lastElement[0] === '[' || elements.pop()[0] === '[';
+				currentObject = stack.peek() ? stack.pop() : currentObject;
+				break;
+			default:
+				if (Array.isArray(currentObject)) {
+					let value = castValue(match[0]);
+					currentObject.push(value);
+				} else if (key === null) {
+					key = match[0].slice(1, -1);
+				} else {
+					currentObject[key] = castValue(match[0]);
+					key = null;
+				}
 		}
+		elements.push(match);
+	});
+	return object;
+}
+
+/**
+ * Casts value to primitive.
+ * @param element
+ * @returns {null|boolean|number|*}
+ */
+function castValue(element) {
+	if (element === 'true' || element === 'false') {
+		return element === 'true';
+	} else if (element === 'null') {
+		return null;
+	} else if (!Number.isNaN(parseInt(element))) {
+		return parseFloat(element);
+	} else {
+		return element.slice(1, -1);
 	}
-	return [object, matches];
+}
+
+/**
+ * Create a field for object or add element into the array.
+ * @param object
+ * @param key
+ * @param value
+ */
+function addField(object, key, value) {
+	if (Array.isArray(object)) {
+		object.push(value);
+	} else {
+		object[key] = value;
+	}
 }
 
 // TESTS
@@ -147,10 +167,32 @@ function handleNestedObject(matches) {
 	}, jsonObject));
 }
 {
-	try {
-		const jsonString = '"name": "John", "age": 30, "cities": ["name": "Minsk", "country": "Belarus"]}';
-		const jsonObject = myJSONParse(jsonString);
-	} catch (e) {
-		console.log(e.message)
-	}
+	const jsonString = `{
+        "id": "647ceaf3657eade56f8224eb",
+        "index": 10,
+        "negativeIndex": -10,
+        "anEmptyArray": [],
+        "notEmptyArray": [1, 2, 3,"string", true, null],
+        "boolean": true,
+        "nullValue": null,
+        "nestedObject": {
+            "nestedString": "Hello World",
+            "nestedNumber": 42,
+            "nestedArray": [true, false]
+        },
+        "complexArray": [
+            {
+                "name": "Alice Alice",
+                "age": 28,
+                "hobbies": ["Reading", "Painting"]
+            },
+            {
+                "name": "Bob Bob",
+                "age": 32,
+                "hobbies": ["Gaming", "Cooking"]
+            }
+        ]
+    }`;
+	const jsonObject = myJSONParse(jsonString);
+	console.log(jsonObject);
 }
